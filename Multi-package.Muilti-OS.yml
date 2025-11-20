@@ -3,5 +3,12 @@
   become: yes
   tasks: 
   - name: Install Apache on ubuntu
-    
+    apt: name=apache2 state=present
+    when: ansible_os_family == "ubuntu"
+    ignore_errors: True
+
+  - name: Install httpd on redhat
+    yum: name=httpd state=present
+    when: ansible_os_family == "redhat"
+    ignore_errors: True  
   
