@@ -5,6 +5,7 @@ _ _ _
   - name: update cache and install vim,curl,unzip packeges
     apt:
       name: "{{ item }}"
+      state: present
       update_cache: yes
     loop:
       - vim
