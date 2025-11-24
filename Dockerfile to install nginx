@@ -1,0 +1,4 @@
+FROM ubuntu                                  #This sets the base image for your Docker image.
+RUN apt update -y && apt install nginx -y    #Runs commands inside the image during build time.
+EXPOSE 80                                    #open port 80
+CMD ["nginx","-g","daemon off;"]             #starts Nginx in the foreground so the container stays running instead of exiting.
