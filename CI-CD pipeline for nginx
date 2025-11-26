@@ -1,0 +1,31 @@
+pipeline {
+agent any
+  stages {
+    stage ('install-nginx')
+    {
+       steps {
+         sh 'sudo apt update -y'
+         sh 'sudo apt install nginx -y'
+       }
+    }
+    stage ('deploy-index')
+    {
+       steps {
+         sh 'echo "welcome" > index.html'
+         sh 'sudo mv index.html /var/www/html/index.html'
+       }
+    }
+    stage ('nginx-stop')
+    {
+       steps {
+          sh 'sudo systemctl stop nginx'
+       }
+    }
+    stage ('start-nginx')
+    {
+       steps {
+          sh 'sudo systemctl start nginx'
+       }
+    }
+  }
+}
