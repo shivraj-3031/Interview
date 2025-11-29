@@ -1,0 +1,69 @@
+############################################
+# VPC + Subnet Group (optional simplified)
+############################################
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_subnet" "subnet_a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = false
+}
+
+resource "aws_subnet" "subnet_b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = false
+}
+
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds-subnet-group"
+  subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+}
+
+############################################
+# Security Group
+############################################
+resource "aws_security_group" "rds_sg" {
+  name        = "rds-sg"
+  description = "Allow inbound to RDS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "Allow Postgres"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # change for production!
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+############################################
+# RDS Instance
+############################################
+
+resource "aws_db_instance" "db_instance" {
+  engine                   = "postgres"                 # Database engine type (postgres, mysql, mariadb, etc.)
+  name                     = "mydatabase"               # Name of the database created inside RDS
+  username                 = "adminuser"                # Master username for database login
+  password                 = "SuperSecret123!"          # Master password for the database (use Secrets Manager in production)
+  skip_final_snapshot      = true                       # Skip creating a snapshot when the DB is deleted (true/false)
+  db_subnet_group_name     = "example-rds-subnet-group" # The RDS subnet group (must exist in your VPC)
+  delete_automated_backups = true                       # Delete automatic backups when the instance is deleted
+  multi_az                 = false                      # If true, deploys RDS in multiple AZs (high availability)
+  publicly_accessible      = false                      # If true, database is accessible from the internet
+  vpc_security_group_ids   = ["sg-0a1b2c3d4e5f6g7h8"]   # Security Group(s) controlling access to RDS
+  instance_class           = "db.t3.micro"              # Size/type of RDS instance (CPU, memory)
+  allocated_storage        = 20                         # Storage size in GB
+}
