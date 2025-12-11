@@ -1,0 +1,51 @@
+provider.tf
+
+provider "aws"  {
+  region = "ap-south-1"
+}
+
+main.tf
+
+resource "aws_key_pair" "my_key" {                       
+  key_name = "mykey"                                       
+  public_key= file("~/.ssh/id_rsa.pub")                    
+}                                                       
+                                         
+
+resource "aws_key_pair" "demo_kay"                       
+  key_name = my_key
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_security_group"  "my_sg"                    
+  name = "ec2-sg"                                            
+  description = allow ssh                                    
+                                                               
+  ingress {                                                
+     from_port = 22                                              
+     to_port = 22                                                
+     protocol = "tcp"                                            
+     cidr_block = ["0.0.0.0/0"]                                  
+  }                                                          
+             
+  egress {                                                         
+     from_port = 0                                              
+     to_port = 0                                                 
+     protocol = tcp                                               
+     cidr_block = ["0.0.0.0/0"]                                  
+  }                                                           
+
+
+resource "aws_ec2_instance" "demo_instance" {             
+  ami = ......                                               
+  instance_type = t2.medium                                    
+  key_name = aws_key_pair.my_key.key_name                       
+  vpc_security_group.ids = aws_security_group.my_sg.id         
+                                                
+                            
+  tags = {                                                    
+
+    Name = "terraform-ec2"                                        
+  }                                                           
+}
+                      
