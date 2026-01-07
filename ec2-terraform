@@ -34,7 +34,7 @@ resource "aws_ec2_instance" "demo_instance" {
   ami = ......                                               
   instance_type = t2.medium                                    
   key_name = aws_key_pair.my_key.key_name                       
-  vpc_security_group.ids = aws_security_group.my_sg.id         
+  vpc_security_group.ids = [aws_security_group.my_sg.id]       
                                                 
                             
   tags = {                                                    
